@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "tracker-boot": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e", "TRACKER_BOOT_API_KEY",
+        "-e", "TRACKER_BOOT_QUERY_URL=http://host.docker.internal:9090/analytics/graphql",
+        "-e", "TRACKER_BOOT_MUTATION_URL=http://host.docker.internal:8080/graphql",
+        "public.ecr.aws/tracker-boot/mcp-server:latest"
+      ],
+      "env": {
+        "TRACKER_BOOT_API_KEY": "${TRACKER_BOOT_API_KEY}"
+      }
+    }
+  }
+}
