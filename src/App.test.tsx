@@ -1,7 +1,12 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import App from './App'
+
+vi.mock('canvas-confetti', () => ({ default: vi.fn() }))
+
+import confetti from 'canvas-confetti'
+const mockConfetti = confetti as unknown as ReturnType<typeof vi.fn>
 
 beforeEach(() => {
   localStorage.clear()
@@ -9,6 +14,11 @@ beforeEach(() => {
 })
 
 describe('App', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+    mockConfetti.mockClear()
+  })
+
   it('renders the heading', () => {
     render(<App />)
     expect(screen.getByText('Vite + React')).toBeInTheDocument()
@@ -32,6 +42,57 @@ describe('App', () => {
     render(<App />)
     expect(screen.getByAltText('Vite logo')).toBeInTheDocument()
     expect(screen.getByAltText('React logo')).toBeInTheDocument()
+  })
+
+  it('triggers confetti and shows celebration message when reaching milestone 10', () => {
+    render(<App />)
+    const button = screen.getByRole('button', { name: /count is/i })
+
+    for (let i = 0; i < 10; i++) {
+      fireEvent.click(button)
+    }
+
+    expect(mockConfetti).toHaveBeenCalledTimes(1)
+    expect(screen.getByRole('status')).toHaveTextContent('Milestone reached!')
+  })
+
+  it('celebration message disappears after 2.5 seconds', () => {
+    vi.useFakeTimers()
+    render(<App />)
+    const button = screen.getByRole('button', { name: /count is/i })
+
+    for (let i = 0; i < 10; i++) {
+      fireEvent.click(button)
+    }
+
+    expect(screen.getByRole('status')).toBeInTheDocument()
+
+    act(() => { vi.advanceTimersByTime(2500) })
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+
+  it('confetti only triggers once per milestone', () => {
+    render(<App />)
+    const button = screen.getByRole('button', { name: /count is/i })
+
+    for (let i = 0; i < 12; i++) {
+      fireEvent.click(button)
+    }
+
+    // Milestone 10 fires once; clicking to 11 and 12 should not fire again
+    expect(mockConfetti).toHaveBeenCalledTimes(1)
+  })
+
+  it('triggers confetti for milestones 10 and 25', () => {
+    render(<App />)
+    const button = screen.getByRole('button', { name: /count is/i })
+
+    for (let i = 0; i < 25; i++) {
+      fireEvent.click(button)
+    }
+
+    expect(mockConfetti).toHaveBeenCalledTimes(2)
   })
 })
 
