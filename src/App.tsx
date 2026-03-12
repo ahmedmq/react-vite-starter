@@ -1,12 +1,38 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import confetti from 'canvas-confetti'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import { useTheme } from './hooks/useTheme'
 
+const MILESTONES = [10, 25, 50, 100]
+
 function App() {
   const [count, setCount] = useState(0)
   const { theme, toggleTheme } = useTheme()
+  const [celebrating, setCelebrating] = useState(false)
+  const celebratedRef = useRef<Set<number>>(new Set())
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
+
+  function increment() {
+    setCount((prev) => {
+      const next = prev + 1
+      if (MILESTONES.includes(next) && !celebratedRef.current.has(next)) {
+        celebratedRef.current.add(next)
+        confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } })
+        setCelebrating(true)
+        if (timerRef.current) clearTimeout(timerRef.current)
+        timerRef.current = setTimeout(() => setCelebrating(false), 2500)
+      }
+      return next
+    })
+  }
 
   return (
     <>
@@ -20,9 +46,12 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
+        <button onClick={increment}>
           count is {count}
         </button>
+        {celebrating && (
+          <p role="status" aria-live="polite">🎉 Milestone reached!</p>
+        )}
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
