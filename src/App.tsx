@@ -34,6 +34,13 @@ function App() {
     })
   }
 
+  function reset() {
+    setCount(0)
+    celebratedRef.current.clear()
+    setCelebrating(false)
+    if (timerRef.current) clearTimeout(timerRef.current)
+  }
+
   return (
     <>
       <div>
@@ -49,6 +56,9 @@ function App() {
         <button onClick={increment}>
           count is {count}
         </button>
+        {count > 0 && (
+          <button onClick={reset}>Reset</button>
+        )}
         {celebrating && (
           <p role="status" aria-live="polite">🎉 Milestone reached!</p>
         )}
