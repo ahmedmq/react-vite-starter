@@ -96,6 +96,41 @@ describe('App', () => {
   })
 })
 
+describe('Reset button', () => {
+  it('is not visible when counter is 0', () => {
+    render(<App />)
+    expect(screen.queryByRole('button', { name: /reset/i })).not.toBeInTheDocument()
+  })
+
+  it('is visible when counter is greater than 0', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /count is 0/i }))
+    expect(screen.getByRole('button', { name: /reset/i })).toBeInTheDocument()
+  })
+
+  it('resets counter to 0 when clicked', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /count is 0/i }))
+    await user.click(screen.getByRole('button', { name: /count is 1/i }))
+    await user.click(screen.getByRole('button', { name: /reset/i }))
+    expect(screen.getByRole('button', { name: /count is 0/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /reset/i })).not.toBeInTheDocument()
+  })
+
+  it('allows milestones to fire again after reset', async () => {
+    render(<App />)
+    const button = screen.getByRole('button', { name: /count is/i })
+    for (let i = 0; i < 10; i++) fireEvent.click(button)
+    expect(mockConfetti).toHaveBeenCalledTimes(1)
+
+    fireEvent.click(screen.getByRole('button', { name: /reset/i }))
+    for (let i = 0; i < 10; i++) fireEvent.click(screen.getByRole('button', { name: /count is/i }))
+    expect(mockConfetti).toHaveBeenCalledTimes(2)
+  })
+})
+
 describe('Theme toggle', () => {
   it('renders a theme toggle button', () => {
     render(<App />)
