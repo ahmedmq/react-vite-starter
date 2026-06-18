@@ -34,6 +34,10 @@ function App() {
     })
   }
 
+  function decrement() {
+    setCount((prev) => Math.max(0, prev - 1))
+  }
+
   function reset() {
     setCount(0)
     celebratedRef.current.clear()
@@ -56,6 +60,9 @@ function App() {
         <button onClick={increment}>
           count is {count}
         </button>
+        {count > 0 && (
+          <button onClick={decrement} aria-label="Decrement counter">−</button>
+        )}
         {count > 0 && (
           <button onClick={reset}>Reset</button>
         )}

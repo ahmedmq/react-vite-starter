@@ -131,6 +131,38 @@ describe('Reset button', () => {
   })
 })
 
+describe('Decrement button', () => {
+  it('is not visible when counter is 0', () => {
+    render(<App />)
+    expect(screen.queryByRole('button', { name: /decrement counter/i })).not.toBeInTheDocument()
+  })
+
+  it('is visible when counter is greater than 0', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /count is 0/i }))
+    expect(screen.getByRole('button', { name: /decrement counter/i })).toBeInTheDocument()
+  })
+
+  it('decrements the counter by one when clicked', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /count is 0/i }))
+    await user.click(screen.getByRole('button', { name: /count is 1/i }))
+    await user.click(screen.getByRole('button', { name: /decrement counter/i }))
+    expect(screen.getByRole('button', { name: /count is 1/i })).toBeInTheDocument()
+  })
+
+  it('does not go below zero and hides itself at zero', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /count is 0/i }))
+    await user.click(screen.getByRole('button', { name: /decrement counter/i }))
+    expect(screen.getByRole('button', { name: /count is 0/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /decrement counter/i })).not.toBeInTheDocument()
+  })
+})
+
 describe('Theme toggle', () => {
   it('renders a theme toggle button', () => {
     render(<App />)
