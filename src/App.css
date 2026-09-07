@@ -40,3 +40,31 @@
 .read-the-docs {
   color: #888;
 }
+
+.milestone-celebration {
+  margin-top: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #646cff;
+  animation: milestone-pop 0.5s ease-out;
+}
+
+@keyframes milestone-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) translateY(8px);
+  }
+  60% {
+    transform: scale(1.08) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .milestone-celebration {
+    animation: none;
+  }
+}

@@ -3,10 +3,10 @@ import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import App from './App'
 
-vi.mock('canvas-confetti', () => ({ default: vi.fn() }))
+vi.mock('./utils/celebrateMilestone', () => ({ celebrateMilestone: vi.fn() }))
 
-import confetti from 'canvas-confetti'
-const mockConfetti = confetti as unknown as ReturnType<typeof vi.fn>
+import { celebrateMilestone } from './utils/celebrateMilestone'
+const mockCelebrateMilestone = celebrateMilestone as unknown as ReturnType<typeof vi.fn>
 
 beforeEach(() => {
   localStorage.clear()
@@ -16,7 +16,7 @@ beforeEach(() => {
 describe('App', () => {
   afterEach(() => {
     vi.useRealTimers()
-    mockConfetti.mockClear()
+    mockCelebrateMilestone.mockClear()
   })
 
   it('renders the heading', () => {
@@ -52,8 +52,9 @@ describe('App', () => {
       fireEvent.click(button)
     }
 
-    expect(mockConfetti).toHaveBeenCalledTimes(1)
-    expect(screen.getByRole('status')).toHaveTextContent('Milestone reached!')
+    expect(mockCelebrateMilestone).toHaveBeenCalledTimes(1)
+    expect(mockCelebrateMilestone).toHaveBeenCalledWith(10)
+    expect(screen.getByRole('status')).toHaveTextContent('Milestone 10 reached!')
   })
 
   it('celebration message disappears after 2.5 seconds', () => {
@@ -81,7 +82,7 @@ describe('App', () => {
     }
 
     // Milestone 10 fires once; clicking to 11 and 12 should not fire again
-    expect(mockConfetti).toHaveBeenCalledTimes(1)
+    expect(mockCelebrateMilestone).toHaveBeenCalledTimes(1)
   })
 
   it('triggers confetti for milestones 10 and 25', () => {
@@ -92,7 +93,9 @@ describe('App', () => {
       fireEvent.click(button)
     }
 
-    expect(mockConfetti).toHaveBeenCalledTimes(2)
+    expect(mockCelebrateMilestone).toHaveBeenCalledTimes(2)
+    expect(mockCelebrateMilestone).toHaveBeenNthCalledWith(1, 10)
+    expect(mockCelebrateMilestone).toHaveBeenNthCalledWith(2, 25)
   })
 })
 
@@ -123,11 +126,11 @@ describe('Reset button', () => {
     render(<App />)
     const button = screen.getByRole('button', { name: /count is/i })
     for (let i = 0; i < 10; i++) fireEvent.click(button)
-    expect(mockConfetti).toHaveBeenCalledTimes(1)
+    expect(mockCelebrateMilestone).toHaveBeenCalledTimes(1)
 
     fireEvent.click(screen.getByRole('button', { name: /reset/i }))
     for (let i = 0; i < 10; i++) fireEvent.click(screen.getByRole('button', { name: /count is/i }))
-    expect(mockConfetti).toHaveBeenCalledTimes(2)
+    expect(mockCelebrateMilestone).toHaveBeenCalledTimes(2)
   })
 })
 
