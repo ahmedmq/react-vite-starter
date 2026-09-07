@@ -1,16 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
-import confetti from 'canvas-confetti'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import { useTheme } from './hooks/useTheme'
+import { celebrateMilestone } from './utils/celebrateMilestone'
 
 const MILESTONES = [10, 25, 50, 100]
 
 function App() {
   const [count, setCount] = useState(0)
   const { theme, toggleTheme } = useTheme()
-  const [celebrating, setCelebrating] = useState(false)
+  const [milestoneReached, setMilestoneReached] = useState<number | null>(null)
   const celebratedRef = useRef<Set<number>>(new Set())
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -25,10 +25,10 @@ function App() {
       const next = prev + 1
       if (MILESTONES.includes(next) && !celebratedRef.current.has(next)) {
         celebratedRef.current.add(next)
-        confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } })
-        setCelebrating(true)
+        celebrateMilestone(next)
+        setMilestoneReached(next)
         if (timerRef.current) clearTimeout(timerRef.current)
-        timerRef.current = setTimeout(() => setCelebrating(false), 2500)
+        timerRef.current = setTimeout(() => setMilestoneReached(null), 2500)
       }
       return next
     })
@@ -37,7 +37,7 @@ function App() {
   function reset() {
     setCount(0)
     celebratedRef.current.clear()
-    setCelebrating(false)
+    setMilestoneReached(null)
     if (timerRef.current) clearTimeout(timerRef.current)
   }
 
@@ -59,8 +59,10 @@ function App() {
         {count > 0 && (
           <button onClick={reset}>Reset</button>
         )}
-        {celebrating && (
-          <p role="status" aria-live="polite">🎉 Milestone reached!</p>
+        {milestoneReached !== null && (
+          <p className="milestone-celebration" role="status" aria-live="polite">
+            🎉 Milestone {milestoneReached} reached!
+          </p>
         )}
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
